@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  app:
+    image: iapps:latest
+    container_name: iapps
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8888:8888"
+    environment:
+      SPRING_DATA_MONGO_HOST: mongodb
+      SPRING_PROFILES_ACTIVE: dockerized
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - iapps-network
+
+  mongodb:
+    image: mongo:5.0
+    container_name: mongodb
+    healthcheck:
+      test: ["CMD","mongo", "--eval", "db.adminCommand('ping')"]
+    ports:
+      - "27017:27017"
+    networks:
+      - iapps-network
+
+networks:
+  iapps-network:
+    driver: bridge
